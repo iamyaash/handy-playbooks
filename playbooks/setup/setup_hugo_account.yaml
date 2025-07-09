@@ -1,0 +1,58 @@
+---
+- name: Creating user account for Hugo & Setup Directory
+  hosts: raspberry
+  become: true
+
+  vars:
+    hugo_username: "hugo-pages"
+    hugo_group: "www-data"
+
+  tasks:
+    - name: Ensure www-data group exists
+      ansible.builtin.group:
+        name: "{{ hugo_group }}"
+        state: present
+
+    - name: Check if user {{ hugo_username }} already exists
+      ansible.builtin.getent:                                   # looks up entries in sys databases like /etc/passwd or /etc/group
+        database: passwd                                        # check system users by looking into /etc/passwd
+        key: "{{ hugo_username }}"                              # username to look for
+      register: passwd_entry                                    # stores the result into a variable to use later
+      ignore_errors: true                                       # if user doesn't exist, we ignore the error
+
+    - name: Create a user {{ hugo_username }} with a home directory if not exists
+      ansible.builtin.user:                                     # manages users on the system
+        name: "{{ hugo_username }}"
+        password: "{{ hugo_username }}"
+        group: "{{ hugo_group }}"
+        groups: sudo
+        append: true
+        create_home: yes                                        # create home directory for the user
+        comment: "A username for Hugo use-cases."
+        state: present
+      when: passwd_entry.failed                                 # condition: runs if the user does not already exist.
+
+
+    - name: Ensure user {{ hugo_username }} is part of www-data group
+      ansible.builtin.user:
+        name: "{{ hugo_username }}"
+        groups: "{{ hugo_group }}"
+        append: yes
+      when: not passwd_entry.failed                             # condition: runs if the user already exist on system.
+
+    - name: Get home directory path for {{ hugo_username }}
+      ansible.builtin.command: "echo ~{{ hugo_username }}"      # runs shell commands; echo the home directory of the user
+      register: hugo_home                                       # output gets stored in hugo_home variable
+      changed_when: false                                       # always report this task as "Unchanged" in playout o/p
+  
+    - debug:
+        msg: "Hugo's home directory is {{ hugo_home.stdout }}"
+
+    - name: Ensure home directory ownership is correct
+      ansible.builtin.file:                                     # managed file/directory properties
+        path: "{{ hugo_home.stdout }}"                          # among stdout,stderror,rc,changed - we need stdout as this contains the output of dir location
+        owner: "{{ hugo_username }}"
+        group: "{{ hugo_group }}"
+        state: directory                                        # ensures it's a directory
+        mode: '0750'                                            # sets permission o=rwx g=rx o=nil
+      when: hugo_home.stdout is defined                         # only runs if the task found a valid home directory path

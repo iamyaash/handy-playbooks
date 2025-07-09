@@ -1,0 +1,34 @@
+---
+- name: Install Nginx on Raspberry Pi & Change the Default Port Address
+  hosts: raspberry
+  become: true
+
+  vars:
+    nginx_port: 2424
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+    
+    - name: Change Nginx Default Port to 2424
+      ansible.builtin.lineinfile:
+        path: /etc/nginx/sites-available/default
+        regexp: '^(\s*)listen\s+80;'
+        line: '\1listen {{nginx_port}};'
+        backrefs: yes
+
+    - name: Test Nginx Configuration
+      ansible.builtin.command: nginx -t 
+      changed_when: false
+
+    - name: Restart Nginx Service to Apply Changes
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+        enabled: true

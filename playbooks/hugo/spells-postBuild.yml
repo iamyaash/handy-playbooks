@@ -1,0 +1,33 @@
+---
+- name: Fix URLs inside existing Hugo public directory
+  hosts: raspberry
+  become: true
+  vars:
+    hugo_username: "hugo-pages"
+    site_dir: "/home/hugo-pages/spells/public"
+    site_path: "/spells"
+
+  tasks:
+    - name: Replace localhost:1313 with IP and port
+      shell: "find . -type f -exec sed -i 's/localhost:1313/192.168.31.101:2425/g' {} +"
+      args:
+        chdir: "{{ site_dir }}"
+      become_user: "{{ hugo_username }}"
+    
+    - name: Replace localhost:80 with IP and port
+      shell: "find . -type f -exec sed -i 's/localhost:80/192.168.31.101:2425/g' {} +"    
+    - name: Replace localhost:80 with IP and port
+      shell: "find . -type f -exec sed -i 's/localhost:80/192.168.31.101:2425/g' {} +"
+
+    - name: Add site path at end of URL
+      shell: "find . -type f -exec sed -i 's#2425#2425{{ site_path }}#g' {} +"
+      args:
+        chdir: "{{ site_dir }}"
+      become_user: "{{ hugo_username }}"
+
+
+    - name: Fix CSS asset paths
+      shell: "find . -type f -exec sed -i 's#assets/css#{{ site_path | trim('/') }}/assets/css#g' {} +"
+      args:
+        chdir: "{{ site_dir }}"
+      become_user: "{{ hugo_username }}"

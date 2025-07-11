@@ -1,0 +1,25 @@
+- name: Debugging Information of the Site for building it
+  debug:
+    msg:
+      - "Home directory: {{ hugo_home.stdout }}"
+      - "Username: {{ hugo_username }}"
+      - "Directory: {{ hugo_home.stdout }}/{{ item.name }}"
+      - "Config file: {{ hugo_config }}"
+
+- name: Modify baseURL in config.yaml
+  shell: "sed -i 's#https://iamyaash.github.io#http://{{ site_ip_port }}/{{ item.name }}/#g' {{ hugo_config }}"
+  args:
+    chdir: "{{ hugo_home.stdout }}/{{ item.name }}"
+  become_user: "{{ hugo_username }}"
+
+- name: Execute after-clone script to pull submodule
+  shell: "./scripts/after-clone.sh"
+  args:
+    chdir: "{{ hugo_home.stdout }}/{{ item.name }}"
+  become_user: "{{ hugo_username }}"
+
+- name: Generate static site
+  shell: "hugo"
+  args:
+    chdir: "{{ hugo_home.stdout }}/{{ item.name }}"
+  become_user: "{{ hugo_username }}"

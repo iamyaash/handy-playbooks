@@ -1,0 +1,16 @@
+---
+- name: Clone GitHub Repository Into Hugo Home Directory
+  hosts: raspberry
+  become: true
+
+  tasks:
+    - name: Get home directory of {{ hugo_username }}
+      command: "echo ~{{ hugo_username }}"
+      register: hugo_home
+      changed_when: false
+
+    - name: Process each Hugo Repository
+      include_tasks: /home/iamyaash/ansible-hugo-local/tasks/clone-site.yaml
+      loop: "{{ repos }}"
+      loop_control:
+        loop_var: item

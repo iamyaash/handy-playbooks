@@ -23,6 +23,24 @@
                   index index.html;
                   try_files $uri $uri/ /index.html;
               }
+
+              location /fedora {
+                  alias /home/hugo-pages/fedora/public;
+                  index index.html;
+                  try_files $uri $uri/ /index.html;
+              }
+
+              location /spells {
+                  alias /home/hugo-pages/spells/public;
+                  index index.html;
+                  try_files $uri $uri/ /index.html;
+              }
+
+              location /blog {
+                  alias /home/hugo-pages/blog/public;
+                  index index.html;
+                  try_files $uri $uri/ /index.html;
+              }
           }
 
     - name: Create symlink to sites-enabled

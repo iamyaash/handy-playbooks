@@ -16,7 +16,7 @@
         name: nginx
         state: present
     
-    - name: Change Nginx Default Port to 2424
+    - name: Change Nginx Default Port to {{nginx_port}}
       ansible.builtin.lineinfile:
         path: /etc/nginx/sites-available/default
         regexp: '^(\s*)listen\s+80;'

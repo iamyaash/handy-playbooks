@@ -17,22 +17,22 @@ sudo visudo
 hugo-pages ALL=(ALL) NOPASSWD:ALL
 ```
 
+- Add ssh key into this machine
+```sh
+ssh-copy-id hugo-pages@192.168.x.x
+```
+
 2. **Setup** the account & `nginx` server
 ```sh
-ansible-playbook -i hosts.ini playbook/setup/setup_hugo_account.yaml --ask-become-pass
+ansible-playbook playbooks/setup-account.yaml
 ```
 ```sh
-ansible-playbook -i hosts.ini playbook/setup/nginx_configuration.yaml
+ansible-playbook playbooks/configure-nginx.yaml
 ```
 
 3. **Clone** the Repositories
 ```sh
-ansible-playbook -i hosts.ini playbook/clone/*
-```
-
-4. **Post-Build modification** for running them in `nginx` server
-```sh
-ansible-playbook -i hosts.ini playbook/hugo/*
+ansible-playbook playbooks/clone-stashed.yaml
 ```
 
 5. **Setup `nginx`** configuration

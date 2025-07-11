@@ -1,0 +1,22 @@
+---
+- name: Open Nginx Port 2424 in firewall
+  hosts: raspberry
+  become: true
+
+  tasks:
+    - name: Ensure firewalld is running
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+    
+    - name: Open Port {{ hugo_port }}
+      ansible.posix.firewalld:
+        port: 2424/tcp
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Reload firewalld
+      ansible.builtin.command: firewall-cmd --reload
+      changed_when: false

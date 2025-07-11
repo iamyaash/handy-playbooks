@@ -3,21 +3,23 @@
   hosts: raspberry
   become: true
 
-  vars:
-    hugo_username: "hugo-pages"
-    hugo_group: "www-data"
-    name_dir: "fedora"
-    repo_url: "https://github.com/iamyaash/fedora.git"
-
   tasks:
     - name: Get home directory of {{ hugo_username }}
       command: "echo ~{{ hugo_username }}"
       register: hugo_home
       changed_when: false
 
+    - debug:
+        msg:
+          - "Home directory: {{ hugo_home.stdout }}"
+          - "Username: {{ hugo_username }}"
+          - "Group: {{ hugo_group }}"
+          - "Directory: {{ hugo_home.stdout }}/{{ name_dir_stashed }}"
+          - "Repository: {{ repo_url_stashed }}"
+    
     - name: Create target directory for repository
       ansible.builtin.file:
-        path: "{{ hugo_home.stdout }}/{{ name_dir }}"
+        path: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
         state: directory
         owner: "{{ hugo_username }}"
         group: "{{ hugo_group }}"
@@ -25,13 +27,14 @@
 
     - name: Clone the repository under target directory
       git:
-        repo: "{{ repo_url }}"
-        dest: "{{ hugo_home.stdout }}/{{ name_dir }}"
+        repo: "{{ repo_url_stashed }}"
+        dest: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
         update: yes
+        version: main 
 
     - name: Ensure correct ownership of cloned repo
       ansible.builtin.file:
-        path: "{{ hugo_home.stdout }}/{{ name_dir }}"
+        path: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
         state: directory
         recurse: yes
         owner: "{{ hugo_username }}"

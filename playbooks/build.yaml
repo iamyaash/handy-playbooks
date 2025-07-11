@@ -1,0 +1,37 @@
+---
+- name: Fix URLs and execute setup for Hugo site
+  hosts: raspberry
+  become: true
+
+  vars:
+    site_ip_port: "{{ ansible_host }}:{{ hugo_port }}"
+
+  tasks:
+    - name: Get home directory of {{ hugo_username }}
+      command: "echo ~{{ hugo_username }}"
+      register: hugo_home
+      changed_when: false
+
+    - debug:
+        msg:
+          - "Home directory: {{ hugo_home.stdout }}"
+          - "Username: {{ hugo_username }}"
+          - "Directory: {{ name_dir_stashed }}"
+
+    - name: Modify baseURL in config.yaml
+      shell: "sed -i 's#https://iamyaash.github.io/#http://{{ site_ip_port }}/{{ name_dir_stashed }}/#g' {{ hugo_config }}"
+      args:
+        chdir: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
+      become_user: "{{ hugo_username }}"
+
+    - name: Execute after-clone script to pull submodule
+      shell: "./scripts/after-clone.sh"
+      args:
+        chdir: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
+      become_user: "{{ hugo_username }}"
+
+    - name: Generate Static Site
+      shell: "hugo build"
+      args:
+        chdir: "{{ hugo_home.stdout }}/{{ name_dir_stashed }}"
+      become_user: "{{ hugo_username }}"

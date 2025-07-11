@@ -1,0 +1,8 @@
+---
+- import_playbook: playbooks/setup-account.yaml
+- import_playbook: playbooks/configure-nginx.yaml
+- import_playbook: playbooks/clone.yaml
+- import_playbook: playbooks/build.yaml
+- import_playbook: playbooks/deploy-nginx.yaml
+- import_playbook: playbooks/firewall.yaml
+

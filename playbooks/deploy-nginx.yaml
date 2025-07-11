@@ -4,8 +4,7 @@
   become: true
 
   vars:
-    nginx_port: 2425
-    server_ip: "192.168.31.101"
+    nginx_port: 2424
     hugo_conf: "hugo.local"
     nginx_conf_path: "/etc/nginx/sites-available/{{ hugo_conf }}"
     nginx_symlink_path: "/etc/nginx/sites-enabled/{{ hugo_conf }}"
@@ -17,28 +16,10 @@
         content: |
           server {
               listen {{ nginx_port }};
-              server_name {{ server_ip }};
+              server_name {{ ansible_host }};
 
               location /stashed {
                   alias /home/hugo-pages/stashed/public;
-                  index index.html;
-                  try_files $uri $uri/ /index.html;
-              }
-
-              location /fedora {
-                  alias /home/hugo-pages/fedora/public;
-                  index index.html;
-                  try_files $uri $uri/ /index.html;
-              }
-
-              location /blog {
-                  alias /home/hugo-pages/blog/public;
-                  index index.html;
-                  try_files $uri $uri/ /index.html;
-              }
-
-              location /spells {
-                  alias /home/hugo-pages/spells/public;
                   index index.html;
                   try_files $uri $uri/ /index.html;
               }

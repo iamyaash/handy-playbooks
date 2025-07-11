@@ -19,6 +19,7 @@ hugo_group: "www-data"
 nginx_conf_dir: /etc/nginx/sites-available
 nginx_symlink_path: /etc/nginx/sites-enabled
 hugo_port: 2424
+hugo_ip: http://192.168.31.88:3000/iamyaash-local
 hugo_config: "hugo.yaml"
 
 

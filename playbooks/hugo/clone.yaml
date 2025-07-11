@@ -10,7 +10,7 @@
       changed_when: false
 
     - name: Process each Hugo Repository
-      include_tasks: /home/iamyaash/ansible-hugo-local/tasks/clone-site.yaml
+      include_tasks: /home/iamyaash/ansible/tasks/clone-site.yaml
       loop: "{{ repos }}"
       loop_control:
         loop_var: item

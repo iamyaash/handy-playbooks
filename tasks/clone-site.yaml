@@ -5,7 +5,7 @@
       - "Username: {{ hugo_username }}"
       - "Group: {{ hugo_group }}"
       - "Directory: {{ hugo_home.stdout }}/{{ item.name }}"
-      - "Repository: http://192.168.31.88:3000/iamyaash-local/{{ item.name }}.git"
+      - "Repository: {{ hugo_ip }}/{{ item.name }}.git"
 
 - name: Create target directory for repository
   ansible.builtin.file:
@@ -17,7 +17,7 @@
 
 - name: Clone the repository under target directory
   git:
-    repo: "http://192.168.31.88:3000/iamyaash-local/{{ item.name }}.git"
+    repo: "{{ hugo_ip }}/{{ item.name }}.git"
     dest: "{{ hugo_home.stdout }}/{{ item.name }}"
     update: yes
     version: main 

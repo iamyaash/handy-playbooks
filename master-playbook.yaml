@@ -1,0 +1,8 @@
+---
+- import_playbook: playbooks/hugo/config/account.yaml
+- import_playbook: playbooks/hugo/config/nginx.yaml
+- import_playbook: playbooks/hugo/clone.yaml           # make sure to change the repository URL
+- import_playbook: playbooks/hugo/build.yaml
+- import_playbook: playbooks/hugo/deploy.yaml
+- import_playbook: playbooks/hugo/firewalld.yaml
+

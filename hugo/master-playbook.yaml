@@ -1,8 +1,0 @@
----
-- import_playbook: playbooks/config/account.yaml
-- import_playbook: playbooks/config/nginx.yaml
-- import_playbook: playbooks/clone.yaml           # make sure to change the repository URL
-- import_playbook: playbooks/build.yaml
-- import_playbook: playbooks/deploy.yaml
-- import_playbook: playbooks/firewalld.yaml
-

@@ -1,0 +1,38 @@
+- name: Uninstall Caddy and Remove Repository
+  hosts: raspberry
+  become: true
+
+  tasks:
+    - name: Uninstall Caddy package
+      apt:
+        name: caddy
+        state: absent
+        purge: yes
+
+    - name: Remove Caddy repository list
+      file:
+        path: /etc/apt/sources.list.d/caddy-stable.list
+        state: absent
+
+    - name: Remove Caddy GPG key
+      file:
+        path: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+        state: absent
+
+    - name: Remove downloaded GPG key (if still present)
+      file:
+        path: /tmp/caddy.gpg.key
+        state: absent
+
+    - name: Remove Caddyfile Configuration
+      file:
+        path: "{{ caddy_location }}"
+        state: absent
+        
+    - name: Autoremove unused packages
+      apt:
+        autoremove: yes
+
+    - name: Clean apt cache
+      apt:
+        autoclean: yes

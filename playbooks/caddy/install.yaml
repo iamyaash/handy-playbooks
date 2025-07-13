@@ -1,0 +1,82 @@
+---
+- name: Install Caddy
+  hosts: raspberry
+  become: true
+
+  tasks:
+    - name: Install required packages
+      apt:
+        name:
+          - debian-keyring
+          - debian-archive-keyring
+          - apt-transport-https
+          - curl
+          - gnupg
+        state: present
+        update_cache: yes
+
+    - name: Download Caddy GPG key (ASCII armored)
+      get_url:
+        url: https://dl.cloudsmith.io/public/caddy/stable/gpg.key
+        dest: /tmp/caddy.gpg.key
+        mode: '0644'
+
+    - name: De-armor Caddy GPG key to binary format
+      command: gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg /tmp/caddy.gpg.key
+      args:
+        creates: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+
+    - name: Download Caddy repository list
+      get_url:
+        url: https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt
+        dest: /etc/apt/sources.list.d/caddy-stable.list
+        mode: '0644'
+
+    - name: Ensure permissions on GPG key
+      file:
+        path: /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+        mode: '0644'
+
+    - name: Ensure permissions on Caddy repo list
+      file:
+        path: /etc/apt/sources.list.d/caddy-stable.list
+        mode: '0644'
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Caddy
+      apt:
+        name: caddy
+        state: present
+
+    - name: Change Caddy Default Port to {{ caddy_port }}
+      ansible.builtin.lineinfile:
+        path: "{{ caddy_location }}"
+        regexp: '^:80(\s|$)'
+        line: ":{{ caddy_port }}"
+        backrefs: no
+
+    - name: Enable & Start Caddy Service
+      ansible.builtin.service:
+        name: caddy
+        state: restarted
+        enabled: true
+
+    - name: Ensure firewalld is running
+      ansible.builtin.service:
+        name: firewalld
+        state: started
+        enabled: true
+    
+    - name: Open Port {{ caddy_port }}
+      ansible.posix.firewalld:
+        port: "{{caddy_port}}/tcp"
+        permanent: true
+        state: enabled
+        immediate: yes
+
+    - name: Reload firewalld
+      ansible.builtin.command: firewall-cmd --reload
+      changed_when: false

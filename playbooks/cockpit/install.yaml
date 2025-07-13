@@ -1,0 +1,38 @@
+---
+- name: Installing Cockpit For Raspberry Pi Devices
+  hosts: raspberry
+  become: true
+
+  tasks:
+    - name: Ensure Debian archive keyring is installed
+      ansible.builtin.apt:
+        name: debian-archive-keyring
+        state: present
+        update_cache: yes
+
+    - name: Add Debian backports repository (modern method)
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/debian-backports.sources
+        content: |
+          Types: deb deb-src
+          URIs: http://deb.debian.org/debian
+          Suites: {{ ansible_distribution_release }}-backports
+          Components: main contrib non-free non-free-firmware
+          Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+    - name: Show repository codename
+      debug:
+        msg: "{{ ansible_distribution_release }}"
+
+    - name: Install Cockpit from backports
+      ansible.builtin.apt:
+        name: cockpit
+        state: present
+        default_release: "{{ ansible_distribution_release }}-backports"
